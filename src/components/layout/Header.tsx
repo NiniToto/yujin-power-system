@@ -225,7 +225,7 @@ const Header = () => {
             </button>
             
             {/* 구분선 */}
-            <div className={`hidden lg:block h-5 w-px mx-5 ${isScrolled ? 'bg-gray-400' : 'bg-white'}`}></div>
+            <div className={`hidden lg:block h-5 w-px mx-10 ${isScrolled ? 'bg-gray-400' : 'bg-white'}`}></div>
             
             {/* 모바일 햄버거 메뉴 버튼 */}
             <button 
