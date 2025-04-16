@@ -75,14 +75,14 @@ const Header = () => {
   return (
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-primary shadow-md py-2' : 'bg-transparent py-4'
+        isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
       }`}
     >
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between">
           {/* 로고 */}
           <Link href="/" className="relative z-10">
-            <h1 className={`text-2xl font-bold ${isScrolled ? 'text-white' : 'text-primary'}`}>
+            <h1 className={`text-2xl font-bold ${isScrolled ? 'text-black' : 'text-white'}`}>
               유진파워시스템
             </h1>
           </Link>
@@ -99,7 +99,7 @@ const Header = () => {
                 <Link 
                   href={item.path}
                   className={`font-medium text-sm hover:text-opacity-80 transition-colors ${
-                    isScrolled ? 'text-white' : 'text-primary'
+                    isScrolled ? 'text-black' : 'text-white'
                   }`}
                   aria-expanded={hoveredMenu === item.name}
                   aria-controls={`${item.name}-dropdown`}
@@ -129,7 +129,7 @@ const Header = () => {
               <button 
                 type="button"
                 className={`flex items-center text-sm font-medium ${
-                  isScrolled ? 'text-white' : 'text-primary'
+                  isScrolled ? 'text-black' : 'text-white'
                 }`}
                 aria-label="언어 선택"
               >
@@ -150,9 +150,9 @@ const Header = () => {
             aria-label="메인 메뉴"
           >
             {isMobileMenuOpen ? (
-              <FiX className={`text-2xl ${isScrolled ? 'text-white' : 'text-primary'}`} />
+              <FiX className={`text-2xl ${isScrolled ? 'text-black' : 'text-white'}`} />
             ) : (
-              <FiMenu className={`text-2xl ${isScrolled ? 'text-white' : 'text-primary'}`} />
+              <FiMenu className={`text-2xl ${isScrolled ? 'text-black' : 'text-white'}`} />
             )}
           </button>
 
