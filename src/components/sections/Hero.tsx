@@ -79,7 +79,7 @@ const Hero = ({
         });
       }
     }
-  }, [currentSlide]);
+  }, [currentSlide]); 
   
   // 슬라이드 자동 변경
   useEffect(() => {
@@ -150,14 +150,12 @@ const Hero = ({
               playsInline
               loop
               poster={videoSlides[currentSlide].poster}
-              src={videoSlides[currentSlide].src}
-            />
+              >
+              <source src={videoSlides[currentSlide].src} type="video/mp4" />  
+            </video>
           </motion.div>
         </AnimatePresence>
       </div>
-      
-      {/* 어두운 오버레이 */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 z-10" />
       
       {/* 슬라이드 컨트롤 (좌측 하단) */}
       <div className="absolute bottom-10 left-8 z-20 flex items-center space-x-4">

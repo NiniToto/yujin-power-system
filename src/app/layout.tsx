@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata: Metadata = {
   title: "유진파워시스템 - 혁신적인 전력 솔루션",
@@ -16,11 +17,13 @@ export default function RootLayout({
   return (
     <html lang="ko" className="scroll-smooth">
       <body className="antialiased">
-        <Header />
-        <main>
-          {children}
-        </main>
-        <Footer />
+        <LanguageProvider>
+          <Header />
+          <main>
+            {children}
+          </main>
+          <Footer />
+        </LanguageProvider>
       </body>
     </html>
   );
