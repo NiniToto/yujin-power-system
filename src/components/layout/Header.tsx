@@ -243,7 +243,7 @@ const Header = () => {
               )}
             </button>
             
-            {/* 데스크톱 햄버거 메뉴 버튼 (taihan.com 스타일) */}
+            {/* 데스크톱 햄버거 메뉴 버튼 */}
             <button
               type="button"
               className="hidden lg:flex items-center justify-center"
@@ -297,7 +297,7 @@ const Header = () => {
         </motion.div>
       )}
 
-      {/* 전체 메뉴 (taihan.com 스타일) */}
+      {/* 전체 메뉴 */}
       {isFullMenuOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -309,7 +309,7 @@ const Header = () => {
           {/* 닫기 버튼 */}
           <button
             type="button"
-            className="absolute top-6 right-6 text-gray-700 hover:text-primary z-50"
+            className="absolute top-5 right-11 text-gray-700 hover:text-primary z-50"
             onClick={toggleFullMenu}
             aria-label="전체 메뉴 닫기"
           >
