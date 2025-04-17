@@ -123,7 +123,7 @@ const Header = () => {
           {/* 로고 - 왼쪽 끝으로 */}
           <Link href="/" className="relative z-10">
             <h1 className={`text-3xl font-bold ${isScrolled ? 'text-black' : 'text-white'}`}>
-              유진파워시스템
+              {language === 'ko' ? '유진 파워 시스템' : 'YUJIN POWER SYSTEM'}
             </h1>
           </Link>
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HeroProps {
   title?: string;
@@ -12,120 +13,163 @@ interface HeroProps {
   backgroundImage?: string;
 }
 
-const videoSlides = [
-  {
-    id: 1,
-    src: "/asset/videos/video001.mp4",
-    poster: "/asset/images/image003.jpg",
-    alt: "유진파워시스템 소개 영상 1"
-  },
-  {
-    id: 2,
-    src: "/asset/videos/video002.mp4",
-    poster: "/asset/images/image003.jpg",
-    alt: "유진파워시스템 소개 영상 2"
-  },
-  {
-    id: 3,
-    src: "/asset/videos/video003.mp4",
-    poster: "/asset/images/image003.jpg",
-    alt: "유진파워시스템 소개 영상 3"
-  }
-];
+// 비디오 슬라이드 정의
+interface VideoSlide {
+  id: number;
+  src: string;
+  poster: string;
+  title: {
+    ko: string;
+    en: string;
+  };
+  subtitle: {
+    ko: string;
+    en: string;
+  };
+  buttonText: {
+    ko: string;
+    en: string;
+  };
+}
 
 const Hero = ({
   title = "유진 파워 시스템",
   subtitle = "혁신적인 전력 솔루션으로 밝은 미래를 만들어 갑니다",
   buttonText = "더 알아보기",
-  buttonLink = "/company"
+  buttonLink = "/company",
 }: HeroProps) => {
+  const { language } = useLanguage();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [progress, setProgress] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // 로딩 바 진행 상태 관리
+  // 비디오 슬라이드 데이터
+  const videoSlides: VideoSlide[] = [
+    {
+      id: 1,
+      src: "/asset/videos/hero-1.mp4",
+      poster: "/asset/images/hero-poster-1.jpg",
+      title: {
+        ko: "유진 파워 시스템",
+        en: "Yujin Power System"
+      },
+      subtitle: {
+        ko: "혁신적인 전력 솔루션으로 밝은 미래를 만들어 갑니다",
+        en: "Creating a brighter future with innovative power solutions"
+      },
+      buttonText: {
+        ko: "더 알아보기",
+        en: "Learn More"
+      }
+    },
+    {
+      id: 2,
+      src: "/asset/videos/hero-2.mp4",
+      poster: "/asset/images/hero-poster-2.jpg",
+      title: {
+        ko: "신뢰할 수 있는 기술",
+        en: "Reliable Technology"
+      },
+      subtitle: {
+        ko: "최첨단 기술로 안정적인 전력 공급을 보장합니다",
+        en: "Ensuring stable power supply with cutting-edge technology"
+      },
+      buttonText: {
+        ko: "기술 소개",
+        en: "Our Technology"
+      }
+    },
+    {
+      id: 3,
+      src: "/asset/videos/hero-3.mp4",
+      poster: "/asset/images/hero-poster-3.jpg",
+      title: {
+        ko: "글로벌 네트워크",
+        en: "Global Network"
+      },
+      subtitle: {
+        ko: "전 세계적인 네트워크로 고객과 함께합니다",
+        en: "Serving customers worldwide through our global network"
+      },
+      buttonText: {
+        ko: "네트워크 보기",
+        en: "View Network"
+      }
+    }
+  ];
+
+  // 현재 언어에 맞는 슬라이드 텍스트 가져오기
+  const currentTitle = videoSlides[currentSlide].title[language];
+  const currentSubtitle = videoSlides[currentSlide].subtitle[language];
+  const currentButtonText = videoSlides[currentSlide].buttonText[language];
+
+  // 타이머 시작/중지 함수
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-    
-    if (isPlaying) {
-      setLoadingProgress(0);
-      intervalId = setInterval(() => {
-        setLoadingProgress(prev => {
+    const startProgressTimer = () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      
+      const slideDuration = 6000; // 6초
+      const intervalTime = 50; // 50ms 마다 업데이트
+      const increment = (intervalTime / slideDuration) * 100;
+      
+      setProgress(0);
+      progressIntervalRef.current = setInterval(() => {
+        setProgress(prev => {
           if (prev >= 100) {
+            nextSlide();
             return 0;
           }
-          return prev + (100 / 80); // 8초 동안 100%까지 증가 (80 * 100ms = 8000ms)
+          return prev + increment;
         });
-      }, 100);
-    } else {
-      if (intervalId) clearInterval(intervalId);
+      }, intervalTime);
+    };
+    
+    if (isPlaying) {
+      startProgressTimer();
+    } else if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
     }
     
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
     };
-  }, [currentSlide, isPlaying]);
+  }, [isPlaying, currentSlide]);
   
-  // 비디오 강제 재생
+  // 비디오 제어 함수
   useEffect(() => {
-    const video = videoRef.current;
-    if (video && video.readyState > 2) {
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn("자동재생 차단됨:", error);
-          setIsPlaying(false);
-        });
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
       }
     }
-  }, [currentSlide]); 
-  
-  // 슬라이드 자동 변경
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % videoSlides.length);
-    }, 8000); // 8초마다 슬라이드 변경
-    
-    return () => clearInterval(interval);
-  }, []);
+  }, [isPlaying, currentSlide]);
   
   // 다음 슬라이드로 이동
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % videoSlides.length);
-    setLoadingProgress(0);
+    setCurrentSlide(prev => (prev + 1) % videoSlides.length);
   };
   
   // 이전 슬라이드로 이동
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + videoSlides.length) % videoSlides.length);
-    setLoadingProgress(0);
+    setCurrentSlide(prev => (prev - 1 + videoSlides.length) % videoSlides.length);
   };
   
   // 특정 슬라이드로 이동
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
-    setLoadingProgress(0);
   };
   
   // 재생/일시정지 토글
   const togglePlayPause = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play().catch(error => {
-        console.warn("비디오 재생 실패:", error);
-      });
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  // 슬라이드 번호 포맷팅 (1 -> "01")
-  const formatSlideNumber = (num: number): string => {
-    return `0${num + 1}`;
+    setIsPlaying(prev => !prev);
   };
 
   return (
@@ -158,64 +202,50 @@ const Hero = ({
       </div>
       
       {/* 슬라이드 컨트롤 (좌측 하단) */}
-      <div className="absolute bottom-10 left-8 z-20 flex items-center space-x-4">
+      <div className="absolute bottom-8 left-1/10 transform -translate-x-1/2 z-30 flex items-center space-x-6">
         {/* 슬라이드 번호 */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
           {videoSlides.map((_, index) => (
             <button
-              key={`slide-${index}`}
-              type="button"
+              key={index}
               onClick={() => goToSlide(index)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  goToSlide(index);
-                }
-              }}
-              className={`text-lg font-bold ${
-                index === currentSlide ? "text-white" : "text-white/40"
-              }`}
-              aria-label={`슬라이드 ${index + 1}로 이동`}
+              className={`text-lg font-medium ${
+                index === currentSlide 
+                  ? 'text-white' 
+                  : 'text-white/40 hover:text-white/70'
+              } transition-colors focus:outline-none`}
+              aria-label={`Go to slide ${index + 1}`}
             >
-              {formatSlideNumber(index)}
+              {index === 0 ? '01' : index === 1 ? '02' : '03'}
             </button>
           ))}
         </div>
         
         {/* 로딩 바 */}
-        <div className="w-24 h-[2px] bg-white/30 overflow-hidden">
+        <div className="w-40 h-0.5 bg-white/30 relative">
           <motion.div 
-            className="h-full bg-white" 
-            initial={{ width: 0 }}
-            animate={{ width: `${loadingProgress}%` }}
-            transition={{ duration: 0.1, ease: "linear" }}
+            className="absolute top-0 left-0 h-full bg-white"
+            style={{ width: `${progress}%` }}
           />
         </div>
         
         {/* 재생/일시정지 버튼 */}
-        <button
-          type="button"
+        <button 
           onClick={togglePlayPause}
-          className="w-10 h-10 flex items-center justify-center bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-          aria-label={isPlaying ? "영상 일시정지" : "영상 재생"}
+          className="w-8 h-8 rounded-full border border-white flex items-center justify-center text-white hover:bg-white/10 transition-colors focus:outline-none"
+          aria-label={isPlaying ? 'Pause video' : 'Play video'}
         >
           {isPlaying ? (
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <title>일시정지</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <span className="block w-3 h-3 border-l-2 border-r-2 border-white"></span>
           ) : (
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <title>재생</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <span className="block w-0 h-0 border-t-[6px] border-b-[6px] border-l-[10px] border-transparent border-l-white ml-0.5"></span>
           )}
         </button>
       </div>
       
-      {/* Scroll Down 인디케이터 */}
+      {/* 스크롤 다운 표시 */}
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
-        <div className="text-white text-sm font-light mb-2">Scroll Down</div>
+        <div className="text-white text-sm font-light mb-2">{language === 'ko' ? '스크롤 다운' : 'Scroll Down'}</div>
         <div/>
         <motion.div 
           className="w-6 h-10 border-2 border-white rounded-full flex justify-center p-1"
@@ -239,7 +269,7 @@ const Hero = ({
             transition={{ duration: 0.7 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
           >
-            {title}
+            {currentTitle}
           </motion.h1>
           
           <motion.p
@@ -248,7 +278,7 @@ const Hero = ({
             transition={{ duration: 0.7, delay: 0.2 }}
             className="text-xl md:text-2xl text-gray-200 mb-8"
           >
-            {subtitle}
+            {currentSubtitle}
           </motion.p>
           
           <motion.div
@@ -260,34 +290,17 @@ const Hero = ({
               href={buttonLink}
               className="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded inline-block text-lg font-medium transition-colors"
             >
-              {buttonText}
+              {currentButtonText}
             </Link>
           </motion.div>
         </div>
       </div>
       
-      {/* 좌우 화살표 버튼 */}
-      <button 
-        type="button"
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 text-white p-2 opacity-70 hover:opacity-100 transition-opacity"
-        aria-label="이전 슬라이드"
-      >
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+      {/* 오버레이 - 비디오 위에 약간의 어두운 오버레이 추가 */}
+      <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
       
-      <button 
-        type="button"
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 text-white p-2 opacity-70 hover:opacity-100 transition-opacity"
-        aria-label="다음 슬라이드"
-      >
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      {/* 배경 그라데이션 오버레이 - 콘텐츠 가독성 향상을 위해 */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent z-10"></div>
     </section>
   );
 };

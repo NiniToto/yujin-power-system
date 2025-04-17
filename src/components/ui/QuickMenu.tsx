@@ -1,110 +1,235 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { 
+  FiPackage, 
+  FiActivity, 
+  FiHeadphones, 
+  FiAward,
+  FiChevronLeft,
+  FiChevronRight
+} from 'react-icons/fi';
 
 const QuickMenu = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node) && isExpanded) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
   const content = {
     ko: {
       toggle: '퀵메뉴',
       links: [
-        { name: '제품소개', href: '/products' },
-        { name: '기술개발', href: '/technology' },
-        { name: '지속가능경영', href: '/esg' },
-        { name: '고객지원', href: '/support' },
-        { name: '전세계 네트워크', href: '/global-network' },
+        { name: '제품소개', href: '/products', icon: <FiPackage />, color: 'bg-blue-500' },
+        { name: '기술개발', href: '/technology', icon: <FiActivity />, color: 'bg-amber-500' },
+        { name: '지속가능경영', href: '/esg', icon: <FiAward />, color: 'bg-green-500' },
+        { name: '고객지원', href: '/support', icon: <FiHeadphones />, color: 'bg-purple-500' },
       ]
     },
     en: {
       toggle: 'Quick Menu',
       links: [
-        { name: 'Products', href: '/products' },
-        { name: 'Technology', href: '/technology' },
-        { name: 'ESG', href: '/esg' },
-        { name: 'Support', href: '/support' },
-        { name: 'Global Network', href: '/global-network' },
+        { name: 'Products', href: '/products', icon: <FiPackage />, color: 'bg-blue-500' },
+        { name: 'Technology', href: '/technology', icon: <FiActivity />, color: 'bg-amber-500' },
+        { name: 'ESG', href: '/esg', icon: <FiAward />, color: 'bg-green-500' },
+        { name: 'Support', href: '/support', icon: <FiHeadphones />, color: 'bg-purple-500' },
       ]
     }
   };
 
   const currentText = content[language as keyof typeof content];
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMenu = () => setIsExpanded(!isExpanded);
 
-  const containerVariants = {
-    closed: {
-      width: '60px',
-      transition: { staggerChildren: 0.05, staggerDirection: -1 }
-    },
-    open: {
-      width: '180px',
-      transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+  // 카드 위치 계산 (12시부터 6시까지 반시계 방향)
+  const getCardPosition = (index: number) => {
+    if (!isExpanded) return "";
+    
+    // 4개 항목을 12시(0도)부터 6시(180도)까지 반시계 방향으로 분배
+    const totalCards = currentText.links.length;
+    // 인덱스에 따라 0도, 60도, 120도, 180도로 분배
+    const angleInDegrees = (180 / (totalCards - 1)) * index;
+    const angleInRadians = (angleInDegrees * Math.PI) / 180;
+    
+    const distance = 80; // 펼쳐진 거리
+    
+    // 반시계 방향으로 계산 (sin, cos 반대로)
+    const x = -Math.sin(angleInRadians) * distance;
+    const y = -Math.cos(angleInRadians) * distance;
+    
+    return `translate(${x}px, ${y}px)`;
+  };
+  
+  // 애니메이션 변형 정의
+  const pulseAnimation = {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 2,
+      repeat: Number.POSITIVE_INFINITY,
+      repeatType: "reverse" as const,
+      ease: "easeInOut"
     }
   };
 
-  const linkVariants = {
-    closed: { opacity: 0, x: 20 },
-    open: { opacity: 1, x: 0 }
+  // 호버 시 애니메이션
+  const hoverAnimation = {
+    scale: 1.05,
+    boxShadow: "0px 10px 25px rgba(0, 0, 0, 0.3)",
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 10
+    }
   };
 
+  // 클릭 시 애니메이션
+  const tapAnimation = {
+    scale: 0.95,
+    transition: {
+      type: "spring",
+      stiffness: 500
+    }
+  };
+  
   return (
-    <motion.div 
-      className="quick-wrap fixed right-0 top-1/2 transform -translate-y-1/2 z-40 bg-white shadow-lg rounded-l-lg overflow-hidden"
-      variants={containerVariants}
-      initial="closed"
-      animate={isOpen ? "open" : "closed"}
+    <div 
+      ref={menuRef}
+      className="fixed right-0 top-1/2 -translate-y-1/2 z-40"
     >
-      <button 
+      {/* 메인 버튼 - 반원형 */}
+      <motion.button
+        type="button"
         onClick={toggleMenu}
-        className="w-full bg-primary text-white py-3 px-4 text-center cursor-pointer flex items-center justify-center"
+        className="h-14 pl-4 pr-2 py-2 flex items-center justify-center z-20 relative overflow-hidden"
+        animate={pulseAnimation}
+        whileHover={hoverAnimation}
+        whileTap={tapAnimation}
+        aria-label={isExpanded ? '퀵메뉴 닫기' : '퀵메뉴 열기'}
+        style={{
+          background: "linear-gradient(135deg, #4f46e5, #6366f1)",
+          boxShadow: "-4px 0px 15px rgba(0, 0, 0, 0.15)",
+          borderTopLeftRadius: "9999px",
+          borderBottomLeftRadius: "9999px",
+        }}
       >
-        <span className={`${isOpen ? 'block' : 'hidden'} mr-2`}>{currentText.toggle}</span>
-        <motion.div 
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
-          )}
-        </motion.div>
-      </button>
-      
-      <AnimatePresence>
-        {isOpen && (
-          <div className="py-2">
-            {currentText.links.map((link, index) => (
-              <motion.div
-                key={index}
-                variants={linkVariants}
-                initial="closed"
-                animate="open"
-                exit="closed"
-                className="py-2 px-4 hover:bg-gray-100 transition-colors duration-200"
-              >
-                <Link 
-                  href={link.href}
-                  className="block text-gray-800 text-sm font-medium"
-                >
-                  {link.name}
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+        {/* 물결 효과 배경 */}
+        <motion.div
+          className="absolute inset-0 bg-white/10"
+          animate={{
+            scale: [1, 1.2, 1], 
+            opacity: [0.3, 0.2, 0.3],
+          }}
+          transition={{
+            duration: 3, 
+            repeat: Number.POSITIVE_INFINITY, 
+            repeatType: "reverse",
+            ease: "easeInOut"
+          }}
+          style={{ 
+            borderTopLeftRadius: "9999px",
+            borderBottomLeftRadius: "9999px"
+          }}
+        />
+        
+        <div className="flex items-center text-white">
+          <span className="text-xs font-medium mr-2 drop-shadow-sm">
+            {currentText.toggle}
+          </span>
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+            className="text-lg text-white relative z-10"
+          >
+            {isExpanded ? <FiChevronRight /> : <FiChevronLeft />}
+          </motion.div>
+        </div>
+      </motion.button>
+
+      {/* 메뉴 항목들 */}
+      <div className="absolute top-0 left-0">
+        {currentText.links.map((link, index) => (
+          <motion.div
+            key={link.href}
+            className="absolute w-14 h-14 rounded-full shadow-lg 
+              transition-all duration-500 flex items-center justify-center overflow-hidden"
+            style={{
+              opacity: isExpanded ? 1 : 0,
+              transform: isExpanded ? getCardPosition(index) : "translate(0, 0) scale(0.5)",
+              visibility: isExpanded ? "visible" : "hidden",
+              zIndex: 10 - index,
+              background: `linear-gradient(135deg, ${getLighterColor(link.color)}, ${getDarkerColor(link.color)})`,
+              boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.15), inset 0px -2px 5px rgba(0, 0, 0, 0.05), inset 0px 2px 5px rgba(255, 255, 255, 0.15)"
+            }}
+          >
+            <Link
+              href={link.href}
+              className="h-full w-full flex flex-col items-center justify-center text-white p-1"
+              onClick={() => setIsExpanded(false)}
+            >
+              <div className="text-lg mb-0.5 drop-shadow-md">{link.icon}</div>
+              <span className="text-[10px] font-medium text-center leading-tight drop-shadow-md">
+                {link.name}
+              </span>
+              
+              {/* 호버 효과 */}
+              <motion.div 
+                className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              />
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 };
+
+// 컬러 변환 유틸리티 함수
+function getLighterColor(color: string): string {
+  // Tailwind 클래스에서 색상 추출
+  const colorMap: {[key: string]: string} = {
+    'bg-blue-500': '#3b82f6',
+    'bg-amber-500': '#f59e0b',
+    'bg-green-500': '#10b981',
+    'bg-purple-500': '#8b5cf6',
+    'bg-indigo-500': '#6366f1',
+  };
+  
+  // 기본 색상
+  const baseColor = colorMap[color] || '#4f46e5';
+  return baseColor;
+}
+
+function getDarkerColor(color: string): string {
+  // Tailwind 클래스에서 어두운 버전 색상 추출
+  const colorMap: {[key: string]: string} = {
+    'bg-blue-500': '#2563eb',
+    'bg-amber-500': '#d97706',
+    'bg-green-500': '#059669',
+    'bg-purple-500': '#7c3aed',
+    'bg-indigo-500': '#4f46e5',
+  };
+  
+  // 기본 색상
+  const baseColor = colorMap[color] || '#4338ca';
+  return baseColor;
+}
 
 export default QuickMenu; 
