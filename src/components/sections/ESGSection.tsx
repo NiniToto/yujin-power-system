@@ -267,9 +267,6 @@ const ESGSection = () => {
         <div className="absolute inset-0 bg-cover bg-center opacity-80" 
           style={{ backgroundImage: 'url(/asset/images/esg_background.jpg)' }} />
         
-        {/* 오버레이 - 가독성 향상을 위한 */}
-        <div className="absolute inset-0 bg-black opacity-50" />
-        
         {/* 문 애니메이션 - 좌우 바깥 영역 (더 작게 조정) */}
         <motion.div 
           className="absolute top-0 left-0 w-1/6 h-full bg-white z-20"
@@ -311,6 +308,8 @@ const ESGSection = () => {
                   className={`px-8 py-16 relative ${
                     index !== currentText.esgItems.length - 1 ? 'md:border-r border-white/30' : ''
                   }`}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <Link 
                     href={item.link}

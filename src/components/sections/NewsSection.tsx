@@ -82,13 +82,13 @@ const NewsSection = ({
   // 언어별 텍스트
   const text = {
     ko: {
-      title: "뉴스룸",
+      title: "News",
       subtitle: "새로운 소식을 알려드립니다.",
       button: "MORE",
       viewDetails: "클릭하여 자세히 보기"
     },
     en: {
-      title: "Newsroom",
+      title: "News",
       subtitle: "We deliver the latest news.",
       button: "MORE",
       viewDetails: "Click to view details"

@@ -169,9 +169,22 @@ const BusinessHighlight = () => {
                 variants={lineVariants}
                 initial="hidden"
                 animate={isVisible ? "visible" : "hidden"}
-                className="text-xl font-semibold text-primary mb-4"
+                className="text-xl font-extrabold text-primary mb-8 flex items-center"
               >
                 {currentText.title}
+                <motion.span
+                  className="text-red-500 ml-1 text-4xl -mt-3.5"
+                  animate={{
+                    opacity: [0, 1, 0],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  .
+                </motion.span>
               </motion.h3>
               
               {/* 메시지 라인 */}
