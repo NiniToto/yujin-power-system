@@ -122,22 +122,24 @@ const QuickMenu = () => {
         whileTap={tapAnimation}
         aria-label={isExpanded ? '퀵메뉴 닫기' : '퀵메뉴 열기'}
         style={{
-          background: "linear-gradient(135deg, #4f46e5, #6366f1)",
-          boxShadow: "-4px 0px 15px rgba(0, 0, 0, 0.15)",
+          background: "linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899)",
+          boxShadow: "-4px 0px 15px rgba(0, 0, 0, 0.15), inset 0px -2px 5px rgba(0, 0, 0, 0.05), inset 0px 2px 5px rgba(255, 255, 255, 0.15)",
           borderTopLeftRadius: "9999px",
           borderBottomLeftRadius: "9999px",
         }}
       >
-        {/* 물결 효과 배경 */}
+        {/* 첫 번째 물결 */}
         <motion.div
           className="absolute inset-0 bg-white/10"
           animate={{
-            scale: [1, 1.2, 1], 
-            opacity: [0.3, 0.2, 0.3],
+            scale: [1, 1.3, 1],
+            opacity: [0.3, 0.1, 0.3],
+            x: [0, 15, 0],
+            y: [0, -15, 0],
           }}
           transition={{
-            duration: 3, 
-            repeat: Number.POSITIVE_INFINITY, 
+            duration: 5,
+            repeat: Number.POSITIVE_INFINITY,
             repeatType: "reverse",
             ease: "easeInOut"
           }}
@@ -146,15 +148,57 @@ const QuickMenu = () => {
             borderBottomLeftRadius: "9999px"
           }}
         />
+        {/* 두 번째 물결 */}
+        <motion.div
+          className="absolute inset-0 bg-white/10"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.1, 0.2],
+            x: [0, -10, 0],
+            y: [0, 10, 0],
+          }}
+          transition={{
+            duration: 4,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+            ease: "easeInOut",
+            delay: 1
+          }}
+          style={{ 
+            borderTopLeftRadius: "9999px",
+            borderBottomLeftRadius: "9999px"
+          }}
+        />
+        {/* 세 번째 물결 */}
+        <motion.div
+          className="absolute inset-0 bg-white/10"
+          animate={{
+            scale: [1, 1.4, 1],
+            opacity: [0.15, 0.05, 0.15],
+            x: [0, 20, 0],
+            y: [0, -20, 0],
+          }}
+          transition={{
+            duration: 6,
+            repeat: Number.POSITIVE_INFINITY,
+            repeatType: "reverse",
+            ease: "easeInOut",
+            delay: 2
+          }}
+          style={{ 
+            borderTopLeftRadius: "9999px",
+            borderBottomLeftRadius: "9999px"
+          }}
+        />
         
-        <div className="flex items-center text-white">
+        <div className="flex items-center text-white relative z-10">
           <span className="text-xs font-medium mr-2 drop-shadow-sm">
             {currentText.toggle}
           </span>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
-            className="text-lg text-white relative z-10"
+            className="text-lg text-white"
           >
             {isExpanded ? <FiChevronRight /> : <FiChevronLeft />}
           </motion.div>

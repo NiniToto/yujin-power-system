@@ -40,10 +40,64 @@ const ScrollToTop = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 p-3 rounded-full bg-blue-500 text-white shadow-lg z-50"
+          className="fixed bottom-8 right-8 p-3 rounded-full text-white shadow-lg z-50 overflow-hidden"
           aria-label="맨 위로 스크롤"
+          style={{
+            background: "linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899)",
+            boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.15), inset 0px -2px 5px rgba(0, 0, 0, 0.05), inset 0px 2px 5px rgba(255, 255, 255, 0.15)"
+          }}
         >
-          <ArrowUpIcon className="h-6 w-6" />
+          {/* 첫 번째 물결 */}
+          <motion.div
+            className="absolute inset-0 bg-white/10"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.3, 0.1, 0.3],
+              x: [0, 15, 0],
+              y: [0, -15, 0],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut"
+            }}
+          />
+          {/* 두 번째 물결 */}
+          <motion.div
+            className="absolute inset-0 bg-white/10"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.1, 0.2],
+              x: [0, -10, 0],
+              y: [0, 10, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
+          {/* 세 번째 물결 */}
+          <motion.div
+            className="absolute inset-0 bg-white/10"
+            animate={{
+              scale: [1, 1.4, 1],
+              opacity: [0.15, 0.05, 0.15],
+              x: [0, 20, 0],
+              y: [0, -20, 0],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut",
+              delay: 2
+            }}
+          />
+          <ArrowUpIcon className="h-6 w-6 relative z-10" />
         </motion.button>
       )}
     </AnimatePresence>
