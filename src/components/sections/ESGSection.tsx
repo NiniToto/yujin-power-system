@@ -11,7 +11,7 @@ const ESGSection = () => {
   const [doorAnimComplete, setDoorAnimComplete] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const titleRef = useRef(null);
-  const esgItemsRef = useRef(null);
+  const [esgItemsRef, esgItemsInView] = useInView({ triggerOnce: false, threshold: 0.3 });
   const doorRef = useRef(null);
   
   // Intersection Observer 설정 (CompanyOverview와 동일하게)
@@ -28,8 +28,6 @@ const ESGSection = () => {
       setIsVisible(false);
     }
   }, [inView]);
-  
-  const esgItemsInView = useInView(esgItemsRef, { once: false, amount: 0.3 });
   
   const { scrollYProgress } = useScroll({
     target: doorRef,
